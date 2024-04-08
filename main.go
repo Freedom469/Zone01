@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"unicode"
+	"slices"
 )
 
 func main() {
@@ -34,12 +35,19 @@ func main() {
 			}
 		} else {
 			word += string(char)
-		}
+		
 	}
-
+}
 	if word != "" {
 		words = append(words, word)
 	}
 
-	fmt.Println(words[0])
+	fmt.Println(words[2])
+
+	if slices.Contains(words, "(up") {
+		indx := slices.Index(words, "(up)")
+		fmt.Println(indx)
+	}
+
+	fmt.Println(words)
 }
