@@ -2,52 +2,28 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"unicode"
-	"slices"
+	"strings"
 )
 
 func main() {
-	args := os.Args[1:]
+	input := "it (cap) was the BEST (low) of times, it was the worst of times (up) , it was the age of wisdom, it was the age of foolishness (cap)"
 
-	if len(args) != 1 {
-		fmt.Println("Usage: <inputfile>")
-		return
+	words := strings.Split(input, " ")
+
+	for i := 0; i < len(words); i++ { 
+		if words[i] == "(cap)" && i > 0 { 
+			words[i-1] = strings.Title(words[i-1])
+			
+			words = append(words[:i], words[i+1:]...) 
+		} else if words[i] == "(up)" && i > 0 { 
+			words[i-1] = strings.ToUpper(words[i-1]) 
+			words = append(words[:i], words[i+1:]...) 
+		} else if words[i] == "(low)" && i > 0 { 
+			words[i-1] = strings.ToLower(words[i-1]) 
+			words = append(words[:i], words[i+1:]...) 
+		}
 	}
 
-	inputfile := args[0]
+	fmt.Println(strings.Join(words, " ")) 
 
-	data, err := ioutil.ReadFile(inputfile)
-	if err != nil {
-		fmt.Printf("Error reading file: %v\n", err)
-		return
-	}
-
-	var words []string
-	word := ""
-
-	for _, char := range data {
-		if unicode.IsSpace(rune(char)) {
-			if word != "" {
-				words = append(words, word)
-				word = ""
-			}
-		} else {
-			word += string(char)
-		
-	}
-}
-	if word != "" {
-		words = append(words, word)
-	}
-
-	fmt.Println(words[2])
-
-	if slices.Contains(words, "(up") {
-		indx := slices.Index(words, "(up)")
-		fmt.Println(indx)
-	}
-
-	fmt.Println(words)
 }
