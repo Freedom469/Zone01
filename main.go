@@ -2,178 +2,152 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
-	"unicode"
 )
 
-func Vowel(s string) string {
-	// Every instance of a should be turned into an if the next word begins with a vowel (a, e, i, o, u) or a h.
-	//  (Ex: "There it was. A amazing rock!" -> "There it was. An amazing rock!").
+func WriteToOutputFile(file, s string) {
+	openFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return
+	}
+	defer openFile.Close()
 
-	// Define vowels and h as a string
-	vowels := "aeiouAEIOUhH"
-	// Split the input string into words
-	words := strings.Fields(s)
-	// fmt.Println(words)
-	// Initialize the result string
-	result := ""
-
-	// Iterate over each word in the input
-	for i, word := range words {
-		// Check if the word is "a" and there's a next word
-		if strings.EqualFold(word, "a") && i+1 < len(words) {
-			nextWord := words[i+1]
-			// Check if the first character of the next word is a vowel or "h"
-			if strings.ContainsRune(vowels, []rune(nextWord)[0]) {
-				// If so, change "a" to "an"
-				word = "an"
-			}
-		}
-		// Append the modified or original word to the result string
-		result += word + " "
+	_, err = openFile.WriteString(s)
+	if err != nil {
+		fmt.Println("Error: ", err)
+		return
 	}
 
-	// Trim any trailing whitespace and return the result
-	return strings.TrimSpace(result)
-}
-
-func PunctuationMark(s string) string {
-	// The punctuation mark ' will always be found with another instance of it and they should be placed to the
-	// right and left of the word in the middle of them, without any spaces.
-	//  (Ex: "I am exactly how they describe me: ' awesome '" -> "I am exactly how they describe me: 'awesome'")
-
-	words := strings.Split(s, "'")
-	for i := range words {
-		words[i] = strings.TrimSpace(words[i])
-		// fmt.Println(words[i])
-	}
-	return strings.Join(words, "'")
-}
-
-func punctuation(s string) string {
-	sRune := []rune(s)
-
-	for i, char := range sRune {
-		if (char != ' ') && !(unicode.IsLetter(char)) && !(unicode.IsDigit(char)) {
-			if sRune[i-1] == ' ' {
-				sRune[i], sRune[i-1] = sRune[i-1], sRune[i]
-			}
-		}
-	}
-
-	return strings.TrimSpace(string(sRune))
+	fmt.Println("Data has been written to the file", file)
 }
 
 func main() {
-	// input := "it (up) was the best of TIMES (up, 3) , it was the worst of times (cap, 7), it was the age of wisdom, it was the age of foolishness Hello World  (up, 10) "
-	// input := "Simply add 42 (hex) and 10 (bin) and you will see the result is 68."
-	// input := "There is no greater agony than bearing a untold story inside you."
-	// input := "I am exactly how they describe me: ' awesome  don't awesome'"
-	input := "I was sitting ' over there dont't ,and  ' then BAMM !!"
+	args := os.Args[1:]
 
-	EditedInput := punctuation(PunctuationMark(Vowel(input)))
+	if len(args) != 2 {
+		fmt.Println("Usage: <inputfile> <outputfile>")
+		return
+	}
 
-	words := strings.Split(EditedInput, " ")
+	inputfile := args[0]
+	outputfile := args[1]
 
-	for i, word := range words {
-		if word != "" {
-			if word == "(cap)" {
+	filedata, err := os.ReadFile(inputfile)
+	if err != nil {
+		fmt.Println("Error while reading file:", err)
+		return
+	}
+
+	words := strings.Fields(string(filedata))
+
+	for i := len(words) - 1; i >= 0; i-- {
+		word := words[i]
+		switch word {
+		case "(cap)":
+			if i > 0 {
 				words[i-1] = strings.Title(words[i-1])
-				words = append(words[:i], words[i+1:]...)
-			} else if word == "(low)" {
-				words[i-1] = strings.ToLower(words[i-1])
-				words = append(words[:i], words[i+1:]...)
-			} else if word == "(up)" {
-				words[i-1] = strings.ToUpper(words[i-1])
-				words = append(words[:i], words[i+1:]...)
-			} else if word == "(up," && i < len(words) {
-				w := strings.Trim(words[i+1], ")")
-				// fmt.Println(w)
-
-				num, error := strconv.Atoi(w)
-
-				if error != nil {
-					panic(error)
-				}
-
-				// 			// if num > i {
-				// 			// 	len :=
-				// 			// }
-
-				for j := 0; j <= num; j++ {
-					words[i-j] = strings.ToUpper(words[i-j])
-				}
-
-				words = append(words[:i], words[i+2:]...)
-
-				// 			// fmt.Println(w)
-			} else if word == "(low," {
-				w := strings.Trim(strings.Trim(words[i+1], words[i][1:]), ")")
-				num, error := strconv.Atoi(w)
-
-				if error != nil {
-					panic(error)
-				}
-
-				// if num > i {
-				// 	len :=
-				// }
-
-				for j := 0; j <= num; j++ {
-					if words[i-j] != "," {
-						words[i-j] = strings.ToLower(words[i-j])
-					}
-				}
-
-				words = append(words[:i], words[i+2:]...)
-
-				// fmt.Println(w)
-			} else if word == "(cap," {
-				w := strings.Trim(strings.Trim(words[i+1], words[i][1:]), ")")
-				num, error := strconv.Atoi(w)
-
-				if error != nil {
-					panic(error)
-				}
-
-				// if num > i {
-				// 	len :=
-				// }
-
-				for j := 0; j <= num; j++ {
-					if words[i-j] != "," {
-						words[i-j] = strings.Title(words[i-j])
-					}
-				}
-
-				words = append(words[:i], words[i+2:]...)
-
-				// fmt.Println(w)
-			} else if word == "(hex)" {
-				num, error := strconv.ParseInt(words[i-1], 16, 64)
-
-				if error != nil {
-					panic(error)
-				}
-
-				words[i-1] = fmt.Sprint(num)
-
-				words = append(words[:i], words[i+1:]...)
-
-			} else if word == "(bin)" {
-				num, error := strconv.ParseInt(words[i-1], 2, 64)
-
-				if error != nil {
-					panic(error)
-				}
-
-				words[i-1] = fmt.Sprint(num)
-
-				words = append(words[:i], words[i+1:]...)
 			}
+			words = append(words[:i], words[i+1:]...)
+		case "(up)":
+			if i > 0 {
+				words[i-1] = strings.ToUpper(words[i-1])
+			}
+			words = append(words[:i], words[i+1:]...)
+		case "(low)":
+			if i > 0 {
+				words[i-1] = strings.ToLower(words[i-1])
+			}
+			words = append(words[:i], words[i+1:]...)
+		case "(hex)":
+			if i > 0 {
+				num, err := strconv.ParseInt(words[i-1], 16, 64)
+				if err == nil {
+					words[i-1] = fmt.Sprintf("%d", num)
+				} else {
+					fmt.Println("Error:", err)
+				}
+			}
+			words = append(words[:i], words[i+1:]...)
+		case "(bin)":
+			if i > 0 {
+				num, err := strconv.ParseInt(words[i-1], 2, 64)
+				if err == nil {
+					words[i-1] = fmt.Sprintf("%d", num)
+				} else {
+					fmt.Println("Error:", err)
+				}
+			}
+			words = append(words[:i], words[i+1:]...)
+		case "(cap,":
+			var value string
+
+			for j := i; j < len(words); j++ {
+				if strings.HasSuffix(words[j], ")") {
+					value += words[j]
+					break
+				} else {
+					value += words[j] + " "
+				}
+			}
+
+			val := strings.Split(value, ",")
+			val = strings.Split(val[1], ")")
+			Strnum := val[0]
+
+			num, err := strconv.Atoi(strings.TrimSpace(Strnum))
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+
+			for k := 1; k <= num; k++ {
+				index := i - k
+				if index >= 0 {
+					words[index] = strings.Title(words[index])
+				} else {
+					break
+				}
+			}
+
+			words = append(words[:i], words[i+2:]...)
+		case "(low," :
+			var value string
+			for j := i; j < len(words); j++ {
+				if strings.HasSuffix(words[j], ")") {
+					value += words[j]
+				} else {
+					value += words[j] + " "
+				}
+			}
+			val := strings.Split(value, ",")
+			val = strings.Split(val[1], ")")
+			strNum := val[0]
+
+			num, error := strconv.Atoi(strings.TrimSpace(strNum))
+
+			if error != nil {
+				fmt.Println(error)
+				return
+			}
+
+			for k := 1; k <= num; k++ {
+				index := i -k
+
+				if index >= 0 {
+					words[index] = strings.ToLower(words[index])
+				} else {
+					break
+				}
+			}
+
+			words = append(words[:i], words[i+2:]...)
+
+			fmt.Println(num)
 		}
 	}
 
-	fmt.Println(strings.Join(words, " "))
+	WriteToOutputFile(outputfile, strings.Join(words, " "))
 }
