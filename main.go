@@ -5,8 +5,43 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
+func punctuation(s string) string {
+	sRune := []rune(s)
+
+	for i, char := range sRune {
+		if (char != ' ') && !(unicode.IsLetter(char)) && !(unicode.IsDigit(char)) {
+			if sRune[i-1] == ' ' {
+				sRune[i], sRune[i-1] = sRune[i-1], sRune[i]
+			}
+		}
+	}
+
+	return strings.TrimSpace(string(sRune))
+}
+
+
+func Vowels(s string) string {
+	vowels := "aeiouAEIOUhH"
+	words := strings.Fields(s)
+	res := ""
+
+	for i, word := range words {
+		if strings.EqualFold(word, "a") && i+1 < len(words) {
+			nextWord := words[i+1]
+
+			if strings.ContainsRune(vowels, []rune(nextWord)[0]) {
+				word = "an"
+			}
+		}
+		res += word + " "
+	}
+
+	return strings.TrimSpace(res)
+	
+}
 func WriteToOutputFile(file, s string) {
 	openFile, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
@@ -41,7 +76,7 @@ func main() {
 		return
 	}
 
-	words := strings.Fields(string(filedata))
+	words := strings.Fields(Vowels(string(filedata)))
 
 	for i := len(words) - 1; i >= 0; i-- {
 		word := words[i]
@@ -83,7 +118,7 @@ func main() {
 			words = append(words[:i], words[i+1:]...)
 		case "(cap,":
 			var value string
-
+		
 			for j := i; j < len(words); j++ {
 				if strings.HasSuffix(words[j], ")") {
 					value += words[j]
@@ -91,18 +126,19 @@ func main() {
 				} else {
 					value += words[j] + " "
 				}
+				
 			}
-
+		
 			val := strings.Split(value, ",")
 			val = strings.Split(val[1], ")")
 			Strnum := val[0]
-
+		
 			num, err := strconv.Atoi(strings.TrimSpace(Strnum))
 			if err != nil {
 				fmt.Println("Error:", err)
 				return
 			}
-
+		
 			for k := 1; k <= num; k++ {
 				index := i - k
 				if index >= 0 {
@@ -111,8 +147,9 @@ func main() {
 					break
 				}
 			}
-
+		
 			words = append(words[:i], words[i+2:]...)
+		
 		case "(low," :
 			var value string
 			for j := i; j < len(words); j++ {
@@ -144,10 +181,8 @@ func main() {
 			}
 
 			words = append(words[:i], words[i+2:]...)
-
-			fmt.Println(num)
 		}
 	}
 
-	WriteToOutputFile(outputfile, strings.Join(words, " "))
+	WriteToOutputFile(outputfile, punctuation(strings.Join(words, " ")))
 }
