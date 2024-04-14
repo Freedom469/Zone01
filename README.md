@@ -1,4 +1,4 @@
-# Punctuation Mark Processor
+#  A Simple Text Completion/Editing/Auto-correction Tool
 
 This Go program processes a text file, applies various transformations based on specified commands, and writes the result to an output file.
 
