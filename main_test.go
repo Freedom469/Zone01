@@ -63,7 +63,7 @@ func TestProcessWordCommandsFunctionality(t *testing.T)  {
 
 	commands := []struct {
 		input string
-		expexted string
+		expected string
 	}{
 		{"it (cap) was the best of times,",  "It was the best of times,"},
 		{"it was the worst of times (up) ", "it was the worst of TIMES"},
@@ -75,8 +75,8 @@ func TestProcessWordCommandsFunctionality(t *testing.T)  {
 	for _, line := range commands {
 		output := ProcessWordCommands(strings.Fields(line.input))
 
-		if output != line.expexted {
-			t.Errorf("\nGot: [%s] \nExpected: [%s]", output, line.expexted)
+		if output != line.expected {
+			t.Errorf("\nGot: [%s] \nExpected: [%s]", output, line.expected)
 		}
 	}
 	
