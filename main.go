@@ -233,5 +233,5 @@ func main() {
 	words := strings.Fields(Vowels(string(filedata)))
 	response := ProcessWordCommands(words)
 	// Write processed data to the output file
-	WriteToOutputFile(outputfile, Punctuation(QuotationMark((response))))
+	WriteToOutputFile(outputfile, QuotationMark(Punctuation((response))))
 }
