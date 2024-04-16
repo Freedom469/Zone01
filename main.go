@@ -19,7 +19,7 @@ func QuotationMark(s string) string {
 func Punctuation(s string) string {
     sRune := []rune(s)
     var new []rune
-
+//iterating over the srune
     for i, char := range sRune {
         if (char != ' ') && char != '\'' && !(unicode.IsLetter(char)) && !(unicode.IsDigit(char)) {
             if i > 0 && sRune[i-1] == ' ' {
